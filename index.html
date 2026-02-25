@@ -153,10 +153,13 @@
         };
 
         // --- إعدادات الاتصال بقاعدة البيانات السحابية ---
+        // !!! هام: ضع هنا مفتاح الـ API الرئيسي الذي يبدأ بـ $2a$10$ !!!
         const JSONBIN_MASTER_KEY = '$2a$10$m0ZgHA6foZO7B/h0M.Psiu5GnvWnTvVRakS/UfqyxSlHYl3V8aYXK';
-        // !!! هام: ضع هنا المعرّف الجديد الذي أنشأته يدوياً !!!
+        
+        // !!! هام: ضع هنا معرّف الصندوق الذي أنشأته يدوياً !!!
         const JSONBIN_BIN_ID = '699ee4a4d0ea881f40d80c1b'; 
-        const JSONBIN_API_URL = `https://api.jsonbin.io/v3/b/${699ee4a4d0ea881f40d80c1b}`;
+        
+        const JSONBIN_API_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 
         let currentUsername = null;
         let usageInterval = null;
