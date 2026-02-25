@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام صلاحيات الانترسبتر - وزارة الداخلية</title>
+    <style>
+        :root {
+            /* لوحة ألوان جديدة مستوحاة من الشعار */
+            --primary-color: #cda434; /* ذهبي */
+            --primary-hover: #e0b84f;
+            --card-bg: rgba(22, 27, 34, 0.9);
+            --input-bg: #0d1117;
+            --border-color: #4a4a4a;
+            --text-color: #e1e1e1;
+            --text-secondary: #999;
+            --success-color: #28a745;
+            --danger-color: #f85149;
+            --warning-color: #ffc107;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000;
+            background-image: radial-gradient(circle, #1a1a1c 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .permission-card {
+            background-color: var(--card-bg);
+            width: 450px;
+            padding: 35px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .logo-container {
+            width: 100px;
+            height: 100px;
+            margin: -85px auto 20px; /* لرفع الشعار فوق البطاقة */
+            background-color: var(--input-bg);
+            border-radius: 50%;
+            padding: 5px;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 0 20px rgba(205, 164, 52, 0.4);
+        }
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .header h1 { font-size: 1.5rem; color: var(--text-color); margin: 0 0 5px 0; }
+        .header p { font-size: 0.9rem; color: var(--text-secondary); margin: 0; }
+
+        .form-group { margin-bottom: 15px; text-align: right; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: var(--text-secondary); }
+
+        input, select {
+            width: 100%; padding: 12px; background-color: var(--input-bg);
+            border: 1px solid var(--border-color); border-radius: 6px;
+            color: var(--text-color); box-sizing: border-box; font-size: 1rem;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(205, 164, 52, 0.2); }
+
+        .btn {
+            width: 100%; padding: 14px; border: none; border-radius: 6px;
+            color: #000; font-weight: bold; font-size: 1rem; cursor: pointer;
+            margin-top: 10px; transition: background-color 0.3s;
+        }
+        .btn-login { background-color: var(--primary-color); }
+        .btn-login:hover { background-color: var(--primary-hover); }
+        
+        .btn-group { display: flex; gap: 10px; }
+        .btn-start { background-color: var(--success-color); color: #fff; }
+        .btn-pause { background-color: var(--warning-color); color: #000; }
+        .btn-grant { background-color: var(--primary-color); }
+        .btn-grant:hover { background-color: var(--primary-hover); }
+
+        #user-dashboard { display: none; }
+        .user-info {
+            background-color: var(--input-bg); border: 1px solid var(--border-color);
+            padding: 20px; border-radius: 6px; margin-bottom: 20px;
+        }
+        .user-info h2 { margin: 0 0 15px 0; font-size: 1.4rem; color: var(--primary-color); }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: right; }
+        .info-item .label { font-size: 0.8rem; color: var(--text-secondary); }
+        .info-item .value { font-size: 1rem; font-weight: bold; color: var(--text-color); }
+
+        #admin-panel, #user-panel { display: none; margin-top: 20px; }
+        .message, .timer-display { padding: 15px; border-radius: 6px; margin-top: 15px; }
+        
+        #confirmation-message { background-color: rgba(40, 167, 69, 0.1); border: 1px solid var(--success-color); color: var(--success-color); }
+        #status-message { background-color: rgba(255, 193, 7, 0.1); border: 1px solid var(--warning-color); color: var(--warning-color); }
+        
+        .timer-display { background-color: rgba(248, 81, 73, 0.1); border: 1px solid var(--danger-color); }
+        .timer-display .label { color: var(--text-secondary); }
+        .timer-display .value { color: var(--danger-color); font-size: 1.5rem; font-weight: bold; font-family: 'Courier New', Courier, monospace; display: block; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="permission-card">
+        <div class="logo-container">
+            <img src="https://cdn.discordapp.com/attachments/1041796545600819261/1475913084119023708/image.png?ex=699fdf6c&is=699e8dec&hm=be2091c048444185aa3125b38ff02f683e2576ab743cd7c147924f697cac6690&" alt="State Police Logo">
+        </div>
+
+        <div id="login-screen">
+            <div class="header" style="margin-bottom: 25px;">
+                <h1>نظام صلاحيات الانترسبتر</h1>
+                <p>قطاع الـ State Police</p>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">الاسم الكامل</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">كلمة المرور</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-login">تسجيل الدخول</button>
+            </form>
+        </div>
+
+        <div id="user-dashboard">
+            <div class="user-info">
+                <h2 id="welcome-message"></h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="label">الرتبة</div>
+                        <div class="value" id="user-rank"></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">الكود العسكري</div>
+                        <div class="value" id="user-military-id"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="admin-panel">
+                <div class="form-group">
+                    <label for="user-select">اختر الفرد لمنح الصلاحية</label>
+                    <select id="user-select"></select>
+                </div>
+                <button id="grant-button" class="btn btn-grant">منح صلاحية (12 ساعة )</button>
+                <div id="confirmation-message" class="message" style="display: none;"></div>
+            </div>
+
+            <div id="user-panel">
+                 <div id="status-message" class="message">حالة الصلاحية: غير مصرح لك حالياً.</div>
+                 <div id="activation-timer-display" class="timer-display" style="display: none;">
+                    <div class="label">مهلة تفعيل الاستخدام</div>
+                    <div class="value" id="activation-timer"></div>
+                 </div>
+                 <div id="usage-timer-display" class="timer-display" style="display: none;">
+                    <div class="label">وقت الاستخدام المتبقي</div>
+                    <div class="value" id="usage-timer"></div>
+                 </div>
+                 <div id="control-buttons" class="btn-group" style="display: none;">
+                    <button id="start-button" class="btn btn-start">بدء الاستخدام</button>
+                    <button id="pause-button" class="btn btn-pause" style="display: none;">إيقاف مؤقت</button>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const users = {
+            "Adel": { password: "3322", rank: "مسؤول النظام", militaryId: "ADMIN-01", isAdmin: true },
+            "Nour Al din AlShammari": { password: "1048", rank: "Skad", militaryId: "T-10" },
+            "Saleh Aljuhani": { password: "2917", rank: "Lieutenant", militaryId: "T-11" },
+            "Muath ALZHRANI": { password: "3884", rank: "Senior Officer", militaryId: "T-30" },
+            "Majed Alshammari": { password: "4751", rank: "Senior Officer", militaryId: "T-31" },
+            "OMAR ABDULAZIZ": { password: "5618", rank: "Police Academy Supervisor", militaryId: "T-32" },
+            "MOHAMMED ALHARBI": { password: "6485", rank: "Officer III", militaryId: "T-42" },
+            "Abdullah Altalha": { password: "7352", rank: "Officer II", militaryId: "T-51" },
+            "Mohammed SAAd": { password: "8219", rank: "Officer II", militaryId: "T-52" },
+            "youssef saleh": { password: "9086", rank: "Officer II", militaryId: "T-53" },
+            "WALEED ALI": { password: "1953", rank: "Officer I", militaryId: "T-70" },
+            "eid alsahli": { password: "2820", rank: "Officer I", militaryId: "T-71" },
+            "Mansour AlSeyabi": { password: "3687", rank: "Officer", militaryId: "T-81" },
+            "ABDU ALQURASHI": { password: "4554", rank: "Officer", militaryId: "T-82" },
+            "OMAR ALQADY": { password: "5421", rank: "Cadet", militaryId: "T-100" },
+            "ATEH ALZAHRANI": { password: "6288", rank: "Cadet", militaryId: "T-101" },
+            "Mashal Asiri": { password: "7155", rank: "Cadet", militaryId: "T-103" }
+        };
+
+        let currentUsername = null;
+        let usageInterval = null;
+        const DOM = {
+            loginScreen: document.getElementById('login-screen'),
+            userDashboard: document.getElementById('user-dashboard'),
+            adminPanel: document.getElementById('admin-panel'),
+            userPanel: document.getElementById('user-panel'),
+            userSelect: document.getElementById('user-select'),
+            grantButton: document.getElementById('grant-button'),
+            confirmationMessage: document.getElementById('confirmation-message'),
+            statusMessage: document.getElementById('status-message'),
+            activationTimerDisplay: document.getElementById('activation-timer-display'),
+            activationTimer: document.getElementById('activation-timer'),
+            usageTimerDisplay: document.getElementById('usage-timer-display'),
+            usageTimer: document.getElementById('usage-timer'),
+            controlButtons: document.getElementById('control-buttons'),
+            startButton: document.getElementById('start-button'),
+            pauseButton: document.getElementById('pause-button'),
+        };
+
+        const formatTime = (seconds) => {
+            const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+            const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+            const s = String(seconds % 60).padStart(2, '0');
+            return `${h}:${m}:${s}`;
+        };
+
+        const getPermissions = () => JSON.parse(localStorage.getItem('permissions')) || {};
+        const setPermissions = (perms) => localStorage.setItem('permissions', JSON.stringify(perms));
+
+        function showDashboard(user) {
+            DOM.loginScreen.style.display = 'none';
+            document.getElementById('welcome-message').innerText = `مرحباً بك، ${currentUsername}`;
+            document.getElementById('user-rank').innerText = user.rank;
+            document.getElementById('user-military-id').innerText = user.militaryId;
+            DOM.userDashboard.style.display = 'block';
+
+            if (user.isAdmin) {
+                DOM.adminPanel.style.display = 'block';
+                DOM.userSelect.innerHTML = Object.keys(users)
+                    .filter(u => !users[u].isAdmin)
+                    .map(u => `<option value="${u}">${u}</option>`).join('');
+            } else {
+                DOM.userPanel.style.display = 'block';
+                updateUserPermissionView();
+            }
+        }
+
+        function updateUserPermissionView() {
+            const permissions = getPermissions();
+            const userPerm = permissions[currentUsername];
+
+            if (!userPerm) {
+                DOM.statusMessage.style.display = 'block';
+                DOM.activationTimerDisplay.style.display = 'none';
+                DOM.usageTimerDisplay.style.display = 'none';
+                DOM.controlButtons.style.display = 'none';
+                return;
+            }
+
+            DOM.statusMessage.style.display = 'none';
+            const now = Date.now();
+            const activationTimeLeft = Math.round((userPerm.activationExpires - now) / 1000);
+
+            if (activationTimeLeft <= 0) {
+                DOM.statusMessage.textContent = 'انتهت صلاحية التفعيل.';
+                DOM.statusMessage.style.display = 'block';
+                DOM.activationTimerDisplay.style.display = 'none';
+                DOM.usageTimerDisplay.style.display = 'none';
+                DOM.controlButtons.style.display = 'none';
+                delete permissions[currentUsername];
+                setPermissions(permissions);
+                return;
+            }
+            
+            DOM.activationTimerDisplay.style.display = 'block';
+            DOM.activationTimer.textContent = formatTime(activationTimeLeft);
+            
+            DOM.usageTimerDisplay.style.display = 'block';
+            DOM.usageTimer.textContent = formatTime(userPerm.usageTimeLeft);
+
+            DOM.controlButtons.style.display = 'flex';
+            
+            if (userPerm.isUsageActive) {
+                startUsageTimer();
+            }
+        }
+
+        function startUsageTimer() {
+            DOM.startButton.style.display = 'none';
+            DOM.pauseButton.style.display = 'inline-block';
+            
+            if (usageInterval) clearInterval(usageInterval);
+
+            usageInterval = setInterval(() => {
+                const permissions = getPermissions();
+                const userPerm = permissions[currentUsername];
+                if (!userPerm || userPerm.usageTimeLeft <= 0) {
+                    clearInterval(usageInterval);
+                    DOM.statusMessage.textContent = 'انتهى وقت الاستخدام.';
+                    DOM.statusMessage.style.display = 'block';
+                    DOM.usageTimerDisplay.style.display = 'none';
+                    DOM.controlButtons.style.display = 'none';
+                    delete permissions[currentUsername];
+                    setPermissions(permissions);
+                    return;
+                }
+                userPerm.usageTimeLeft--;
+                DOM.usageTimer.textContent = formatTime(userPerm.usageTimeLeft);
+                setPermissions(permissions);
+            }, 1000);
+        }
+
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const user = users[username];
+
+            if (user && user.password === password) {
+                currentUsername = username;
+                showDashboard(user);
+            } else {
+                alert('اسم المستخدم أو كلمة المرور غير صحيحة.');
+            }
+        });
+
+        DOM.grantButton.addEventListener('click', () => {
+            const selectedUser = DOM.userSelect.value;
+            const permissions = getPermissions();
+            permissions[selectedUser] = {
+                activationExpires: Date.now() + 12 * 3600 * 1000,
+                usageTimeLeft: 3600,
+                isUsageActive: false
+            };
+            setPermissions(permissions);
+
+            DOM.confirmationMessage.textContent = `تم منح صلاحية لـ ${selectedUser}.`;
+            DOM.confirmationMessage.style.display = 'block';
+            setTimeout(() => { DOM.confirmationMessage.style.display = 'none'; }, 5000);
+        });
+
+        DOM.startButton.addEventListener('click', () => {
+            const permissions = getPermissions();
+            if (permissions[currentUsername]) {
+                permissions[currentUsername].isUsageActive = true;
+                setPermissions(permissions);
+                startUsageTimer();
+            }
+        });
+
+        DOM.pauseButton.addEventListener('click', () => {
+            clearInterval(usageInterval);
+            const permissions = getPermissions();
+            if (permissions[currentUsername]) {
+                permissions[currentUsername].isUsageActive = false;
+                setPermissions(permissions);
+            }
+            DOM.startButton.style.display = 'inline-block';
+            DOM.pauseButton.style.display = 'none';
+        });
+
+        setInterval(() => {
+            if (currentUsername && !users[currentUsername].isAdmin) {
+                const permissions = getPermissions();
+                const userPerm = permissions[currentUsername];
+                if (userPerm) {
+                    const activationTimeLeft = Math.round((userPerm.activationExpires - Date.now()) / 1000);
+                    if (activationTimeLeft > 0) {
+                        DOM.activationTimer.textContent = formatTime(activationTimeLeft);
+                    } else {
+                        updateUserPermissionView();
+                    }
+                }
+            }
+        }, 1000);
+
+    </script>
+</body>
+</html>
