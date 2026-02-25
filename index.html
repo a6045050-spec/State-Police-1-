@@ -5,115 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام صلاحيات الانترسبتر - وزارة الداخلية</title>
     <style>
+        /* كود الـ CSS لم يتغير */
         :root {
-            /* لوحة ألوان جديدة مستوحاة من الشعار */
-            --primary-color: #cda434; /* ذهبي */
-            --primary-hover: #e0b84f;
-            --card-bg: rgba(22, 27, 34, 0.9);
-            --input-bg: #0d1117;
-            --border-color: #4a4a4a;
-            --text-color: #e1e1e1;
-            --text-secondary: #999;
-            --success-color: #28a745;
-            --danger-color: #f85149;
-            --warning-color: #ffc107;
+            --primary-color: #cda434; --primary-hover: #e0b84f; --card-bg: rgba(22, 27, 34, 0.9);
+            --input-bg: #0d1117; --border-color: #4a4a4a; --text-color: #e1e1e1;
+            --text-secondary: #999; --success-color: #28a745; --danger-color: #f85149; --warning-color: #ffc107;
         }
-
         body {
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--text-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #000;
-            background-image: radial-gradient(circle, #1a1a1c 1px, transparent 1px);
+            margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center;
+            color: var(--text-color); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000; background-image: radial-gradient(circle, #1a1a1c 1px, transparent 1px);
             background-size: 20px 20px;
         }
-
         .permission-card {
-            background-color: var(--card-bg);
-            width: 450px;
-            padding: 35px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            text-align: center;
-            backdrop-filter: blur(5px);
+            background-color: var(--card-bg); width: 450px; padding: 35px; border-radius: 8px;
+            border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center; backdrop-filter: blur(5px);
         }
-        
         .logo-container {
-            width: 100px;
-            height: 100px;
-            margin: -85px auto 20px; /* لرفع الشعار فوق البطاقة */
-            background-color: var(--input-bg);
-            border-radius: 50%;
-            padding: 5px;
-            border: 2px solid var(--primary-color);
+            width: 100px; height: 100px; margin: -85px auto 20px; background-color: var(--input-bg);
+            border-radius: 50%; padding: 5px; border: 2px solid var(--primary-color);
             box-shadow: 0 0 20px rgba(205, 164, 52, 0.4);
         }
-        .logo-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
+        .logo-container img { width: 100%; height: 100%; object-fit: cover; }
         .header h1 { font-size: 1.5rem; color: var(--text-color); margin: 0 0 5px 0; }
         .header p { font-size: 0.9rem; color: var(--text-secondary); margin: 0; }
-
         .form-group { margin-bottom: 15px; text-align: right; }
         .form-group label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: var(--text-secondary); }
-
         input, select {
-            width: 100%; padding: 12px; background-color: var(--input-bg);
-            border: 1px solid var(--border-color); border-radius: 6px;
-            color: var(--text-color); box-sizing: border-box; font-size: 1rem;
+            width: 100%; padding: 12px; background-color: var(--input-bg); border: 1px solid var(--border-color);
+            border-radius: 6px; color: var(--text-color); box-sizing: border-box; font-size: 1rem;
         }
         input:focus, select:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(205, 164, 52, 0.2); }
-
         .btn {
-            width: 100%; padding: 14px; border: none; border-radius: 6px;
-            color: #000; font-weight: bold; font-size: 1rem; cursor: pointer;
-            margin-top: 10px; transition: background-color 0.3s;
+            width: 100%; padding: 14px; border: none; border-radius: 6px; color: #000;
+            font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 10px; transition: background-color 0.3s;
         }
         .btn-login { background-color: var(--primary-color); }
         .btn-login:hover { background-color: var(--primary-hover); }
-        
         .btn-group { display: flex; gap: 10px; }
         .btn-start { background-color: var(--success-color); color: #fff; }
         .btn-pause { background-color: var(--warning-color); color: #000; }
         .btn-grant { background-color: var(--primary-color); }
         .btn-grant:hover { background-color: var(--primary-hover); }
-
         #user-dashboard { display: none; }
         .user-info {
-            background-color: var(--input-bg); border: 1px solid var(--border-color);
-            padding: 20px; border-radius: 6px; margin-bottom: 20px;
+            background-color: var(--input-bg); border: 1px solid var(--border-color); padding: 20px;
+            border-radius: 6px; margin-bottom: 20px;
         }
         .user-info h2 { margin: 0 0 15px 0; font-size: 1.4rem; color: var(--primary-color); }
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: right; }
         .info-item .label { font-size: 0.8rem; color: var(--text-secondary); }
         .info-item .value { font-size: 1rem; font-weight: bold; color: var(--text-color); }
-
         #admin-panel, #user-panel { display: none; margin-top: 20px; }
         .message, .timer-display { padding: 15px; border-radius: 6px; margin-top: 15px; }
-        
         #confirmation-message { background-color: rgba(40, 167, 69, 0.1); border: 1px solid var(--success-color); color: var(--success-color); }
         #status-message { background-color: rgba(255, 193, 7, 0.1); border: 1px solid var(--warning-color); color: var(--warning-color); }
-        
         .timer-display { background-color: rgba(248, 81, 73, 0.1); border: 1px solid var(--danger-color); }
         .timer-display .label { color: var(--text-secondary); }
         .timer-display .value { color: var(--danger-color); font-size: 1.5rem; font-weight: bold; font-family: 'Courier New', Courier, monospace; display: block; margin-top: 5px; }
     </style>
 </head>
 <body>
-
     <div class="permission-card">
         <div class="logo-container">
             <img src="https://cdn.discordapp.com/attachments/1041796545600819261/1475913084119023708/image.png?ex=699fdf6c&is=699e8dec&hm=be2091c048444185aa3125b38ff02f683e2576ab743cd7c147924f697cac6690&" alt="State Police Logo">
         </div>
-
         <div id="login-screen">
             <div class="header" style="margin-bottom: 25px;">
                 <h1>نظام صلاحيات الانترسبتر</h1>
@@ -195,8 +152,49 @@
             "Mashal Asiri": { password: "7155", rank: "Cadet", militaryId: "T-103" }
         };
 
+        // !!! هام جداً: ضع مفتاحك هنا !!!
+        const JSONBIN_MASTER_KEY = '$2a$10$YourMasterKeyHere...'; // استبدل هذا بمفتاحك
+        // تم تحديث الـ ID
+        const JSONBIN_BIN_ID = '699edaea1a35bc08958031fc'; 
+        const JSONBIN_API_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+
         let currentUsername = null;
         let usageInterval = null;
+
+        async function getPermissions( ) {
+            try {
+                const response = await fetch(`${JSONBIN_API_URL}/latest`, {
+                    headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+                });
+                if (response.status === 404) {
+                    console.log("Bin not found or is empty. Creating a new one with empty data.");
+                    const initialData = {}; // صندوق فارغ
+                    await setPermissions(initialData);
+                    return initialData;
+                }
+                const data = await response.json();
+                return data.record;
+            } catch (error) {
+                console.error("Error fetching permissions:", error);
+                return {};
+            }
+        }
+
+        async function setPermissions(perms) {
+            try {
+                await fetch(JSONBIN_API_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_MASTER_KEY
+                    },
+                    body: JSON.stringify(perms)
+                });
+            } catch (error) {
+                console.error("Error setting permissions:", error);
+            }
+        }
+        
         const DOM = {
             loginScreen: document.getElementById('login-screen'),
             userDashboard: document.getElementById('user-dashboard'),
@@ -216,16 +214,14 @@
         };
 
         const formatTime = (seconds) => {
+            if (seconds < 0) seconds = 0;
             const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
             const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
             const s = String(seconds % 60).padStart(2, '0');
             return `${h}:${m}:${s}`;
         };
 
-        const getPermissions = () => JSON.parse(localStorage.getItem('permissions')) || {};
-        const setPermissions = (perms) => localStorage.setItem('permissions', JSON.stringify(perms));
-
-        function showDashboard(user) {
+        async function showDashboard(user) {
             DOM.loginScreen.style.display = 'none';
             document.getElementById('welcome-message').innerText = `مرحباً بك، ${currentUsername}`;
             document.getElementById('user-rank').innerText = user.rank;
@@ -239,12 +235,12 @@
                     .map(u => `<option value="${u}">${u}</option>`).join('');
             } else {
                 DOM.userPanel.style.display = 'block';
-                updateUserPermissionView();
+                await updateUserPermissionView();
             }
         }
 
-        function updateUserPermissionView() {
-            const permissions = getPermissions();
+        async function updateUserPermissionView() {
+            const permissions = await getPermissions();
             const userPerm = permissions[currentUsername];
 
             if (!userPerm) {
@@ -266,7 +262,7 @@
                 DOM.usageTimerDisplay.style.display = 'none';
                 DOM.controlButtons.style.display = 'none';
                 delete permissions[currentUsername];
-                setPermissions(permissions);
+                await setPermissions(permissions);
                 return;
             }
             
@@ -289,8 +285,8 @@
             
             if (usageInterval) clearInterval(usageInterval);
 
-            usageInterval = setInterval(() => {
-                const permissions = getPermissions();
+            usageInterval = setInterval(async () => {
+                const permissions = await getPermissions();
                 const userPerm = permissions[currentUsername];
                 if (!userPerm || userPerm.usageTimeLeft <= 0) {
                     clearInterval(usageInterval);
@@ -299,16 +295,19 @@
                     DOM.usageTimerDisplay.style.display = 'none';
                     DOM.controlButtons.style.display = 'none';
                     delete permissions[currentUsername];
-                    setPermissions(permissions);
+                    await setPermissions(permissions);
                     return;
                 }
                 userPerm.usageTimeLeft--;
                 DOM.usageTimer.textContent = formatTime(userPerm.usageTimeLeft);
-                setPermissions(permissions);
+                // We only update the backend every 10 seconds to reduce API calls
+                if (userPerm.usageTimeLeft % 10 === 0) {
+                    await setPermissions(permissions);
+                }
             }, 1000);
         }
 
-        document.getElementById('login-form').addEventListener('submit', (e) => {
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
@@ -316,62 +315,61 @@
 
             if (user && user.password === password) {
                 currentUsername = username;
-                showDashboard(user);
+                await showDashboard(user);
             } else {
                 alert('اسم المستخدم أو كلمة المرور غير صحيحة.');
             }
         });
 
-        DOM.grantButton.addEventListener('click', () => {
+        DOM.grantButton.addEventListener('click', async () => {
             const selectedUser = DOM.userSelect.value;
-            const permissions = getPermissions();
+            const permissions = await getPermissions();
             permissions[selectedUser] = {
                 activationExpires: Date.now() + 12 * 3600 * 1000,
                 usageTimeLeft: 3600,
                 isUsageActive: false
             };
-            setPermissions(permissions);
+            await setPermissions(permissions);
 
             DOM.confirmationMessage.textContent = `تم منح صلاحية لـ ${selectedUser}.`;
             DOM.confirmationMessage.style.display = 'block';
             setTimeout(() => { DOM.confirmationMessage.style.display = 'none'; }, 5000);
         });
 
-        DOM.startButton.addEventListener('click', () => {
-            const permissions = getPermissions();
+        DOM.startButton.addEventListener('click', async () => {
+            const permissions = await getPermissions();
             if (permissions[currentUsername]) {
                 permissions[currentUsername].isUsageActive = true;
-                setPermissions(permissions);
+                await setPermissions(permissions);
                 startUsageTimer();
             }
         });
 
-        DOM.pauseButton.addEventListener('click', () => {
+        DOM.pauseButton.addEventListener('click', async () => {
             clearInterval(usageInterval);
-            const permissions = getPermissions();
+            const permissions = await getPermissions();
             if (permissions[currentUsername]) {
                 permissions[currentUsername].isUsageActive = false;
-                setPermissions(permissions);
+                await setPermissions(permissions);
             }
             DOM.startButton.style.display = 'inline-block';
             DOM.pauseButton.style.display = 'none';
         });
 
-        setInterval(() => {
-            if (currentUsername && !users[currentUsername].isAdmin) {
-                const permissions = getPermissions();
+        setInterval(async () => {
+            if (currentUsername && users[currentUsername] && !users[currentUsername].isAdmin) {
+                const permissions = await getPermissions();
                 const userPerm = permissions[currentUsername];
-                if (userPerm) {
+                if (userPerm && !userPerm.isUsageActive) {
                     const activationTimeLeft = Math.round((userPerm.activationExpires - Date.now()) / 1000);
                     if (activationTimeLeft > 0) {
                         DOM.activationTimer.textContent = formatTime(activationTimeLeft);
                     } else {
-                        updateUserPermissionView();
+                        await updateUserPermissionView();
                     }
                 }
             }
         }, 1000);
-
     </script>
 </body>
 </html>
