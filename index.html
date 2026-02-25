@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام صلاحيات الانترسبتر</title>
     <style>
+        /* الـ CSS لم يتغير */
         :root {
             --primary-color: #cda434; --primary-hover: #e0b84f; --card-bg: rgba(22, 27, 34, 0.9);
             --input-bg: #0d1117; --border-color: #4a4a4a; --text-color: #e1e1e1;
@@ -151,54 +152,80 @@
             "Mashal Asiri": { password: "7155", rank: "Cadet", militaryId: "T-103" }
         };
 
-        // --- تم وضع المفتاح الصحيح هنا ---
+        // --- إعدادات الاتصال بقاعدة البيانات السحابية ---
         const JSONBIN_MASTER_KEY = '$2a$10$m0ZgHA6foZO7B/h0M.Psiu5GnvWnTvVRakS/UfqyxSlHYl3V8aYXK';
-        const JSONBIN_BIN_ID = '699edaea1a35bc08958031fc'; 
-        const JSONBIN_API_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+        // هذا المعرّف سيتم إنشاؤه وحفظه تلقائياً
+        const BIN_ID_STORAGE_KEY = 'myAppBinId'; 
 
         let currentUsername = null;
         let usageInterval = null;
 
-        async function getPermissions( ) {
+        // --- دوال الاتصال الجديدة ---
+        async function getBinId() {
+            let binId = localStorage.getItem(BIN_ID_STORAGE_KEY);
+            if (binId) {
+                return binId;
+            }
+            // إذا لم يكن هناك Bin ID، قم بإنشاء واحد جديد
+            console.log("No Bin ID found. Creating a new Bin...");
             try {
-                const response = await fetch(`${JSONBIN_API_URL}/latest`, {
-                    headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+                const response = await fetch('https://api.jsonbin.io/v3/b', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_MASTER_KEY,
+                        'X-Bin-Name': 'InterceptorAppPermissions', // اسم للصندوق
+                        'X-Collection-Id': '66a50b9ee41b4d34e4137532' // ضع هنا Collection ID إذا أردت تنظيم الصناديق
+                    },
+                    body: JSON.stringify({} ) // ابدأ ببيانات فارغة
                 });
-                if (response.status === 404) {
-                    const initialData = {};
-                    await setPermissions(initialData);
-                    return initialData;
-                }
-                if (!response.ok) {
-                    throw new Error(`API Error: ${response.statusText}`);
-                }
+                if (!response.ok) throw new Error('Failed to create Bin');
+                const data = await response.json();
+                binId = data.metadata.id;
+                localStorage.setItem(BIN_ID_STORAGE_KEY, binId);
+                console.log("New Bin created and saved with ID:", binId);
+                return binId;
+            } catch (error) {
+                console.error("CRITICAL: Could not create a new Bin.", error);
+                alert("خطأ فادح: لم نتمكن من إنشاء قاعدة البيانات. يرجى المحاولة مرة أخرى.");
+                return null;
+            }
+        }
+
+        async function getPermissions() {
+            const binId = await getBinId();
+            if (!binId) return {};
+            try {
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+                    headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+                } );
+                if (!response.ok) throw new Error(`API Error: ${response.status}`);
                 const data = await response.json();
                 return data.record;
             } catch (error) {
-                console.error("Error fetching permissions:", error);
-                alert("خطأ في الاتصال بقاعدة البيانات. تأكد من صحة مفتاح API.");
+                console.error("Failed to fetch permissions:", error);
                 return {};
             }
         }
 
         async function setPermissions(perms) {
+            const binId = await getBinId();
+            if (!binId) return;
             try {
-                const response = await fetch(JSONBIN_API_URL, {
+                await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Master-Key': JSONBIN_MASTER_KEY
                     },
-                    body: JSON.stringify(perms)
+                    body: JSON.stringify(perms )
                 });
-                 if (!response.ok) {
-                    throw new Error(`API Error: ${response.statusText}`);
-                }
             } catch (error) {
-                console.error("Error setting permissions:", error);
+                console.error("Failed to set permissions:", error);
             }
         }
         
+        // --- بقية الكود لم يتغير ---
         const DOM = {
             loginScreen: document.getElementById('login-screen'),
             userDashboard: document.getElementById('user-dashboard'),
@@ -290,8 +317,9 @@
             if (usageInterval) clearInterval(usageInterval);
 
             usageInterval = setInterval(async () => {
-                const permissions = await getPermissions();
-                const userPerm = permissions[currentUsername];
+                let permissions = await getPermissions();
+                let userPerm = permissions[currentUsername];
+
                 if (!userPerm || userPerm.usageTimeLeft <= 0) {
                     clearInterval(usageInterval);
                     DOM.statusMessage.textContent = 'انتهى وقت الاستخدام.';
@@ -304,7 +332,8 @@
                 }
                 userPerm.usageTimeLeft--;
                 DOM.usageTimer.textContent = formatTime(userPerm.usageTimeLeft);
-                if (userPerm.usageTimeLeft % 10 === 0) {
+                
+                if (userPerm.usageTimeLeft % 15 === 0) {
                     await setPermissions(permissions);
                 }
             }, 1000);
