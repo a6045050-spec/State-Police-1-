@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام صلاحيات الانترسبتر - وزارة الداخلية</title>
+    <title>نظام صلاحيات الانترسبتر</title>
     <style>
-        /* كود الـ CSS لم يتغير */
         :root {
             --primary-color: #cda434; --primary-hover: #e0b84f; --card-bg: rgba(22, 27, 34, 0.9);
             --input-bg: #0d1117; --border-color: #4a4a4a; --text-color: #e1e1e1;
@@ -152,9 +151,8 @@
             "Mashal Asiri": { password: "7155", rank: "Cadet", militaryId: "T-103" }
         };
 
-        // !!! هام جداً: ضع مفتاحك هنا !!!
-        const JSONBIN_MASTER_KEY = '$2a$10$YourMasterKeyHere...'; // استبدل هذا بمفتاحك
-        // تم تحديث الـ ID
+        // --- تم وضع المفتاح الصحيح هنا ---
+        const JSONBIN_MASTER_KEY = '$2a$10$m0ZgHA6foZO7B/h0M.Psiu5GnvWnTvVRakS/UfqyxSlHYl3V8aYXK';
         const JSONBIN_BIN_ID = '699edaea1a35bc08958031fc'; 
         const JSONBIN_API_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 
@@ -167,22 +165,25 @@
                     headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
                 });
                 if (response.status === 404) {
-                    console.log("Bin not found or is empty. Creating a new one with empty data.");
-                    const initialData = {}; // صندوق فارغ
+                    const initialData = {};
                     await setPermissions(initialData);
                     return initialData;
+                }
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.statusText}`);
                 }
                 const data = await response.json();
                 return data.record;
             } catch (error) {
                 console.error("Error fetching permissions:", error);
+                alert("خطأ في الاتصال بقاعدة البيانات. تأكد من صحة مفتاح API.");
                 return {};
             }
         }
 
         async function setPermissions(perms) {
             try {
-                await fetch(JSONBIN_API_URL, {
+                const response = await fetch(JSONBIN_API_URL, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -190,6 +191,9 @@
                     },
                     body: JSON.stringify(perms)
                 });
+                 if (!response.ok) {
+                    throw new Error(`API Error: ${response.statusText}`);
+                }
             } catch (error) {
                 console.error("Error setting permissions:", error);
             }
@@ -300,7 +304,6 @@
                 }
                 userPerm.usageTimeLeft--;
                 DOM.usageTimer.textContent = formatTime(userPerm.usageTimeLeft);
-                // We only update the backend every 10 seconds to reduce API calls
                 if (userPerm.usageTimeLeft % 10 === 0) {
                     await setPermissions(permissions);
                 }
